@@ -1,0 +1,35 @@
+service: discord-oauth-test # NOTE: update this with your service name
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: us-east-1
+  environment:
+    DB_URI: ${env:DB_URI}
+    client_ID: ${env:client_ID}
+    client_secret: ${env:client_secret}
+
+package:
+ include:
+   - features/**
+   - models/**
+functions:
+  loginUser:
+    handler: features/auth/login.login
+    events:
+      - http:
+          path: auth/login
+          method: GET
+          cors: true
+  loginUserCallback:
+    handler: features/auth/login.oauthCallback
+    events:
+      - http:
+          path: auth/login/callback
+          method: GET
+          cors: true
+    

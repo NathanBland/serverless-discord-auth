@@ -1,0 +1,29 @@
+{
+  "name": "serverless-discord-auth",
+  "version": "1.0.0",
+  "description": "A test repository for oauth2 and discord.",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NathanBland/serverless-discord-auth.git"
+  },
+  "author": "Nathan Bland",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NathanBland/serverless-discord-auth/issues"
+  },
+  "homepage": "https://github.com/NathanBland/serverless-discord-auth#readme",
+  "devDependencies": {
+    "serverless-offline": "^3.25.6"
+  },
+  "dependencies": {
+    "client-oauth2": "^4.2.1",
+    "mongoose": "^5.2.7",
+    "mongoose-findorcreate": "^3.0.0",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2"
+  }
+}
