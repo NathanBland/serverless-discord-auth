@@ -12,7 +12,8 @@ module.exports = (db) => {
     // displayName: String,
     email: String,
     discord: mongoose.Schema.Types.Mixed,
-    acess_token: String
+    acess_token: String,
+    channels: [mongoose.Schema.Types.Mixed]
     // username: {
     //   type: String,
     //   unique: true

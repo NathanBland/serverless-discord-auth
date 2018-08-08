@@ -11,20 +11,21 @@ module.exports.login = (event, context, callback) => {
 
 module.exports.oauthCallback = (event, context, callback) => {
   // console.log('hit callback:', event, context)
+  const selfURL = event.requestContext.stage === 'dev' ? ' https://t4jgu9l4n7.execute-api.us-east-1.amazonaws.com' : 'http://127.0.0.1:3001'
   const mongoose = Mongoose.createConnection(process.env.DB_URI)
   const User = require('../../models/user')(mongoose)
   const query = event.queryStringParameters
   const ClientOAuth2 = require('client-oauth2')
 
-  // console.log('event:', event)
+  // console.log('stage:', event)
   // console.log('context:', context)
   const discordAuth = new ClientOAuth2({
     clientId: process.env.client_ID,
     clientSecret: process.env.client_secret,
     accessTokenUri: 'https://discordapp.com/api/oauth2/token',
     authorizationUri: 'https://discordapp.com/api/oauth2/authorize',
-    redirectUri: 'http://127.0.0.1:3001/auth/login/callback',
-    scopes: ['email', 'identity']
+    redirectUri: selfURL + '/auth/login/callback',
+    scopes: ['email', 'identity', 'messages.read', 'guilds']
   })
 
   discordAuth.code.getToken(event.path + '?code=' + query.code)
@@ -44,6 +45,22 @@ module.exports.oauthCallback = (event, context, callback) => {
         user.doc.discord = res
         user.doc.access_token = usr.data.access_token
         return user.doc.save()
+      })
+      .then(user => {
+        return rq({
+          uri: discordBase + '/users/@me/guilds',
+          headers: {
+            'Authorization': 'Bearer ' + usr.data.access_token
+          },
+          json: true
+        })
+        .then(channels => {
+          user.channels = channels
+          return user.save()
+        })
+        .catch(err => {
+          console.log('err', err.message)
+        })
       })
       .then(user => {
         const response = {
@@ -66,6 +83,7 @@ module.exports.oauthCallback = (event, context, callback) => {
     const response = {
       statusCode: 401,
       body: JSON.stringify({
+        err
       }),
     };
     callback(null, response);

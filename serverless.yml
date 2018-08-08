@@ -32,4 +32,7 @@ functions:
           path: auth/login/callback
           method: GET
           cors: true
+          parameters:
+              querystrings:
+                code: true
     
