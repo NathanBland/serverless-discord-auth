@@ -11,7 +11,7 @@ module.exports.login = (event, context, callback) => {
 
 module.exports.oauthCallback = (event, context, callback) => {
   // console.log('hit callback:', event, context)
-  const selfURL = event.requestContext.stage === 'dev' ? ' https://t4jgu9l4n7.execute-api.us-east-1.amazonaws.com' : 'http://127.0.0.1:3001'
+  const selfURL = event.requestContext.stage === 'dev' ? 'https://t4jgu9l4n7.execute-api.us-east-1.amazonaws.com' : 'http://127.0.0.1:3001'
   const mongoose = Mongoose.createConnection(process.env.DB_URI)
   const User = require('../../models/user')(mongoose)
   const query = event.queryStringParameters
@@ -28,7 +28,7 @@ module.exports.oauthCallback = (event, context, callback) => {
     scopes: ['email', 'identity', 'messages.read', 'guilds']
   })
 
-  discordAuth.code.getToken(event.path + '?code=' + query.code)
+  discordAuth.code.getToken(selfURL + event.path + '?code=' + query.code)
   .then(usr => {
     const options = {
       uri: discordBase + '/users/@me',
@@ -46,22 +46,22 @@ module.exports.oauthCallback = (event, context, callback) => {
         user.doc.access_token = usr.data.access_token
         return user.doc.save()
       })
-      .then(user => {
-        return rq({
-          uri: discordBase + '/users/@me/guilds',
-          headers: {
-            'Authorization': 'Bearer ' + usr.data.access_token
-          },
-          json: true
-        })
-        .then(channels => {
-          user.channels = channels
-          return user.save()
-        })
-        .catch(err => {
-          console.log('err', err.message)
-        })
-      })
+      // .then(user => {
+      //   return rq({
+      //     uri: discordBase + '/users/@me/guilds',
+      //     headers: {
+      //       'Authorization': 'Bearer ' + usr.data.access_token
+      //     },
+      //     json: true
+      //   })
+      //   .then(channels => {
+      //     user.channels = channels
+      //     return user.save()
+      //   })
+      //   .catch(err => {
+      //     console.log('err', err.message)
+      //   })
+      // })
       .then(user => {
         const response = {
           statusCode: 200,
@@ -83,7 +83,8 @@ module.exports.oauthCallback = (event, context, callback) => {
     const response = {
       statusCode: 401,
       body: JSON.stringify({
-        err
+        err,
+        path: selfURL + event.path
       }),
     };
     callback(null, response);
